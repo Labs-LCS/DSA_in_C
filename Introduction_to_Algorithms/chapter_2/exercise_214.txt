@@ -1,0 +1,154 @@
+Consider the problem of adding two n-bit binary integers, stored in two n-element
+arrays A and B. The sum of the two integers should be stored in binary form in
+an (n+1)-element array C. State the problem formally and write pseudocode for
+adding the two integers.
+
+***
+
+This problem is what the concepts of half-adder and full-adder chips aims to tackle.
+When the computer sums two numbers, it first need to read them in their binary form.
+So, for example, if we need to sum 5 and 4, we need to convert them to n^2+n^0 and
+n^2, respectively. This is read as 101 and 100 in binary. So, the addition is like
+this:
+
+1       carry
+  1 0 1 number 5 or A = [1, 0, 1]
++ 1 0 0 number 4 or B = [1, 0, 0]
+-------
+1 0 0 1 number 9 or C = [1, 0, 0, 1]
+
+The sum above is simple (only two numbers) and can be done with the two mentioned
+chips. The half-adder chip consists of a clever wiring of two types of transistors:
+the AND-gate and the XOR-gate. The XOR-gate will sum the numbers and the AND-gate
+will compute the carry bit.
+
+It is important to notice that the half-adder itself cannot carry any numbers. So,
+in practice, the left-most bit will be lost. This happens because the half-adder
+handles single-bit addition without carry-in. For multi-bit addition, a full-adder
+is required, which takes three inputs: A, B, and a carry-in bit from the previous
+stage.
+
+In the NAND2TETRIS course, I represented the full-adder chip as follows:
+
+CHIP FullAdder {
+    IN a, b, c;         // 1-bit inputs
+    OUT sum,            // Right bit of a + b + c
+        carry;          // Left bit of a + b + c
+
+    PARTS:
+    DMux(in = b, sel = a, a = Out00, b = Out01);
+    Xor(a = Out00, b = Out10, out = OutSum0);
+    And(a = Out00, b = Out10, out = OutCarry0);
+    DMux(in = c, sel = a, a = Out10, b = Out11);
+    Xor(a = Out01, b = Out11, out = OutSum0Inversed);
+    Not(in = OutSum0Inversed, out = OutSum1);
+    Or(a = Out01, b = Out11, out = OutCarry1);
+    Mux(a = OutSum0, b = OutSum1, sel = a, out = sum);
+    Mux(a = OutCarry0, b = OutCarry1, sel = a, out = carry);
+}
+
+The AI summary is:
+
+|| This is a Full Adder implemented using basic digital logic gates (such as XOR,
+|| AND, MUX, DMUX).
+|| 
+|| The goal of this FullAdder chip is to simulate a logic circuit that takes three
+|| input bits (`a`, `b`, and `c`, where `c` is the carry-in from the previous bit)
+|| and outputs two bits: `sum` (the least significant bit of the sum) and `carry`
+|| (the most significant bit of the sum, or the carry-out).
+||
+|| Disclaimer: in the binary arrays used here, bits are ordered from most significant
+|| to least significant, left to right. That means index 0 refers to the highest-order
+|| bit.
+|| 
+|| The implementation breaks the logic into two main branches, using a DMux to
+|| separate the logic depending on the value of `a`.
+|| 
+|| In the first part, the DMux splits the signal `b` based on `a`. If `a` is 0,
+|| `Out00` receives `b` and `Out01` is 0. If `a` is 1, `Out01` receives `b` and
+|| `Out00` is 0. This prepares the input for two different logical paths depending
+|| on the value of `a`.
+|| 
+|| Then, when `a` is 0, the circuit performs a half-adder computation between `b`
+|| and `c`. This is done using XOR and AND gates:
+|| 
+|| * The XOR gate computes the sum bit of `b + c`.
+|| * The AND gate computes the carry bit.
+|| 
+|| In the second part, another DMux is used to separate `c` based on `a`, in order to
+|| handle the case when `a` is 1. The circuit then uses XOR, NOT, and OR gates to
+|| compute a different version of the sum and carry. While it may look slightly different
+|| from the textbook formula, this logic works correctly within the Nand2Tetris framework.
+|| 
+|| Finally, two Mux gates are used to choose between the two computed paths. The selector
+|| is `a` again, so:
+|| 
+|| * If `a` is 0, the output comes from the first path (`OutSum0`, `OutCarry0`).
+|| * If `a` is 1, the output comes from the second path (`OutSum1`, `OutCarry1`).
+|| 
+|| In the end, the circuit successfully computes the full-adder logic: adding three 1-bit
+|| inputs and producing a 2-bit result.
+
+This is represented as follows:
+
++-------------------+
+|       A   1  0  1 |
+|       B   1  0  0 | --> This computes the sum between each bit.
+| XOR-gate  0  0  1 |
++-------------------+
+|       A   1  0  1 |
+|       B   1  0  0 | --> This computes the carry bit. The only sum that ends
+| AND-gate  1  0  0 |     in a carry number is the left-most sum (1 + 1).
++-------------------+
+
+Once the AND-gate determines that only the left-most sum provides a carry, the C array
+must start with the carry bit, and it is the programmer's duty to come up with an
+algorithm that makes it possible.
+
+Now, let's sum the highest possible 3-bit integers: (2^3)-1 + (2^3)-1, which is 7 + 7,
+or, in their binary form, 111 + 111.
+
+1 1 1   carry
+  1 1 1 number 7 or A = [1, 1, 1]
++ 1 1 1 number 7 or B = [1, 1, 1]
+-------
+1 1 1 0 number 14 or C = [1, 1, 1, 0]
+
++-------------------+
+|       A   1  1  1 |
+|       B   1  1  1 | --> This computes the sum between each bit.
+| XOR-gate  0  0  0 |
++-------------------+
+|       A   1  1  1 |
+|       B   1  1  1 | --> This computes the carry bit. Every sum will produce a carry
+| AND-gate  1  1  1 |     bit.
++-------------------+
+
+In this case, the AND-gate determines that every sum will produce a carry bit, which
+will be provided to the next sum operation computed by the XOR-gate.
+
+The pseudocode for this operation is:
+
+|| Input: arrays A[0..n-1], B[0..n-1] // n-bit binary integers
+|| Output: array C[0..n]              // (n+1)-bit result of A + B
+|| 
+|| carry ← 0
+|| for i from n−1 down to 0:
+||     sum ← A[i] + B[i] + carry  // * Explanation down below
+||     C[i+1] ← sum mod 2         // Store the current bit of the result
+||     carry ← sum div 2          // Update the carry (0 or 1)
+|| 
+|| C[0] ← carry                   // Final carry becomes the most significant bit
+
+
+* This is where the bits A[i], B[i], and the carry from the previous step are added.
+
+Since all of them are bits (values 0 or 1), the sum can result in the following values:
+
+-> 0 + 0 + 0 = 0
+-> 0 + 0 + 1 = 1
+-> 0 + 1 + 1 = 2
+-> 1 + 1 + 1 = 3
+
+In other words, the value of `sum` can be 0, 1, 2, or 3.
+
