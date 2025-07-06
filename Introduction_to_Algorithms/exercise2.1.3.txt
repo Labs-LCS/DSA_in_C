@@ -1,0 +1,32 @@
+
+Consider the searching problem:
+Input: A sequence of n numbers A = ⟨a1, a2, . . . , an⟩ and a value v.
+
+Output: An index i such that v = A[i] or the special value NIL if v does not
+appear in A.
+
+Write pseudocode for linear search, which scans through the sequence, looking
+for v. Using a loop invariant, prove that your algorithm is correct. Make sure that
+your loop invariant fulfills the three necessary properties.
+
+  do
+    i <- 0
+    while i < length[A]
+      do 
+        if A[i] == v
+          return i
+        else
+          i <- i + 1
+    return NIL
+
+Initialization: first, zero is assigned to i, and there is no comparisons/searches made, so,
+since v does not appear in an empty array, the invariant holds. In other words, the subarray
+A[0..i-1] is empty.
+
+Maintenance: the while loop starts by checking if 'i' is less than length[A], and it will
+always be, once there is no non-empty array with less than 1 unity of length. Then, the
+while loop checks if A[i] is equal the value 'v', and returns 'i' if so. If A[i] is not
+equal to 'v', then i + 1 is assigned to 'i'.
+
+Termination: if no value of the array A correspond to the value of 'v', then the outer loop
+instruction is called, returning NIL as the linear search failed to find a match.
