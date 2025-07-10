@@ -1,0 +1,4 @@
+
+Other problems in this chapter focuses on C syntax rather than C logic.
+Thus, I opt to not solve them.
+
