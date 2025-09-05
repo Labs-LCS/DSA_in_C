@@ -1,0 +1,53 @@
+1. We discussed using the expression sizeof(a) / sizeof(a[0]) to calculate the num-
+ber of elements in an array. The expression sizeof(a) / sizeof(t), where t is the type
+of a’s elements, would also work, but it’s considered an inferior technique. Why?
+A: I think it is because the type's byte lenght may vary, as 32-bit machines would store int and long int values in 4 bytes, where a 64-bit machine would store long int in 8 bytes. This may cause bugs and confusion if the program should be portable to various architectures.
+
+2. The Q&A section shows how to use a letter as an array subscript. Describe how to use a
+digit (in character form) as a subscript.
+A: Using the same logic as subtracting any char from the first char we got, we can subtract any digit in its char form from the first digit we got, which is zero. So:
+// int numbers[10];
+// numbers['9'-'0'] = 9;
+
+3. Write a declaration of an array named weekend containing seven bool values. Include an
+initializer that makes the first and last values true; all other values should be false.
+A: int weekend[7] = {1, 0, 0, 0, 0, 0, 1};
+
+4. (C99) Repeat Exercise 3, but this time use a designated initializer. Make the initializer as short as possible.
+A: int weekend[7] = {[0] = 1, [6] = 1};
+
+5. The Fibonacci numbers are 0, 1, 1, 2, 3, 5, 8, 13, …, where each number is the sum of the two preceding numbers. Write a program fragment that declares an array named fib_numbers of length 40 and fills the array with the first 40 Fibonacci numbers. Hint: Fill in the first two numbers individually, then use a loop to compute the remaining numbers.
+A: See exercise_5.c
+
+6. Calculators, watches, and other electronic devices often rely on seven-segment displays for numerical output. To form a digit, such devices “turn on” some of the seven segments while leaving others “off”: (...). Suppose that we want to set up an array that remembers which segments should be “on” for each digit. Let’s number the segments as follows: (...).
+Here’s what the array might look like, with each row representing one digit:
+>>> const int segments[10][7] = {{1, 1, 1, 1, 1, 1, 0}, …};
+I’ve given you the first row of the initializer; fill in the rest.
+A:
+const int segments[10][7] = {{1, 1, 1, 1, 1, 1, 0},
+                             {0, 1, 1, 0, 0, 0, 0},
+                             {1, 1, 0, 1, 1, 0, 1},
+                             {1, 1, 1, 1, 0, 0, 1},
+                             {0, 1, 1, 0, 0, 1, 1},
+                             {1, 0, 1, 1, 0, 1, 1},
+                             {1, 0, 1, 1, 1, 1, 1},
+                             {1, 1, 1, 0, 0, 0, 0},
+                             {1, 1, 1, 1, 1, 1, 1},
+                             {1, 1, 1, 1, 0, 1, 1}}
+
+7. Using the shortcuts described in Section 8.2, shrink the initializer for the segments array (Exercise 6) as much as you can.
+A:
+const int segments[10][7] = {{1, 1, 1, 1, 1, 1},
+                             {[1] = 1, 1},
+                             {1, 1, [3] = 1, 1, [6] = 1},
+                             {1, 1, 1, 1, [6] = 1},
+                             {[1] = 1, 1, [5] = 1, 1},
+                             {1, [2] = 1, 1, [5] = 1, 1},
+                             {1, [2] = 1, 1, 1, 1, 1},
+                             {1, 1, 1},
+                             {1, 1, 1, 1, 1, 1, 1},
+                             {1, 1, 1, 1, [5] = 1, 1}}
+
+8. Write a declaration for a two-dimensional array named temperature_readings that stores one month of hourly temperature readings. (For simplicity, assume that a month has 30 days.) The rows of the array should represent days of the month; the columns should represent hours of the day.
+A:
+int temperature_readings[30][24];
